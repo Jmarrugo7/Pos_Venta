@@ -24,7 +24,7 @@ export function ModalHistorial({ cliente, onCerrar }: ModalHistorialProps) {
                 const { data, error } = await supabase
                     .from('ventas')
                     .select('*')
-                    .eq('cliente_id', cliente.id)
+                    .eq('cliente_id', cliente?.id)
                     .order('fecha', { ascending: false })
 
                 if (error) throw error
