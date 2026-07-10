@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/productos', label: 'Inventario', icon: '📦' },
   { href: '/dashboard/clientes', label: 'Clientes', icon: '👥' },
   { href: '/dashboard/inventario', label: 'Movimientos', icon: '🏭' },
+  { href: '/dashboard/facturas', label: 'Facturas', icon: '🧾' },
   { href: '/dashboard/deudas', label: 'Deudas', icon: '💳' },
   { href: '/dashboard/estadisticas', label: 'Estadísticas', icon: '📈' },
 ]
@@ -25,8 +26,8 @@ function NavLink({ href, label, icon, onClick }: { href: string; label: string; 
       href={href}
       onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${activo
-          ? 'bg-gradient-to-r from-coca-600 to-coca-700 text-white shadow-md shadow-coca-600/15'
-          : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
+        ? 'bg-gradient-to-r from-coca-600 to-coca-700 text-white shadow-md shadow-coca-600/15'
+        : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
         }`}
     >
       <span className={`text-base transition-transform duration-200 ${!activo ? 'group-hover:scale-110' : ''}`}>

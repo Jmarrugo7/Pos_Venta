@@ -13,6 +13,7 @@ export const NAV_ITEMS = [
   { href: '/dashboard/productos', label: 'Productos', icon: '📦' },
   { href: '/dashboard/clientes', label: 'Clientes', icon: '👥' },
   { href: '/dashboard/inventario', label: 'Inventario', icon: '🏭' },
+  { href: '/dashboard/facturas', label: 'Facturas', icon: '🧾' },
   { href: '/dashboard/deudas', label: 'Deudas', icon: '💳' },
   { href: '/dashboard/estadisticas', label: 'Estadísticas', icon: '📈' },
 ]
@@ -23,11 +24,10 @@ function NavLink({ href, label, icon }: { href: string; label: string; icon: str
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-        activo
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${activo
           ? 'bg-red-600 text-white font-medium'
           : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-      }`}
+        }`}
     >
       <span>{icon}</span>
       {label}
@@ -111,9 +111,8 @@ export function MobileHeader() {
               key={item.href}
               href={item.href}
               onClick={() => setMenuAbierto(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                pathname === item.href ? 'text-red-400 font-medium' : 'text-gray-400'
-              }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${pathname === item.href ? 'text-red-400 font-medium' : 'text-gray-400'
+                }`}
             >
               <span>{item.icon}</span>
               {item.label}
