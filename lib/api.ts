@@ -23,7 +23,7 @@ async function apiFetch<T>(url: string, options: RequestInit): Promise<T> {
 }
 
 // ── Ventas ────────────────────────────────────────────────────
-export async function crearVentaAPI(items: any[], tipo: string, clienteId?: string) {
+export async function crearVentaAPI(items: any[], tipo: string, clienteId?: string): Promise<any> {
     return apiFetch('/api/ventas', { method: 'POST', body: JSON.stringify({ items, tipo, clienteId }) })
 }
 

@@ -153,7 +153,7 @@ export async function getVentas(limite = 50) {
     const err = await res.json().catch(() => ({ error: 'Error al cargar ventas' }))
     throw new Error(err.error ?? 'Error al cargar ventas')
   }
-  return (await res.json()) as Venta[]
+  return (await res.json()) as any
 }
 
 export async function crearVenta(
