@@ -48,14 +48,10 @@ function sumaTotal(rows: any[] | null): number {
     return rows?.reduce((s: number, r: any) => s + (r.total ?? 0), 0) ?? 0
 }
 
-// Query reutilizable: ventas con items y costos en un rango de fechas
 async function queryVentasConItems(desde: string, hasta: string) {
-    const { data } = await supabase
-        .from('ventas')
-        .select('total, fecha, items:venta_items(cantidad, precio_unitario, producto:productos(nombre, costo_compra))')
-        .gte('fecha', desde + 'T00:00:00')
-        .lte('fecha', hasta + 'T23:59:59')
-    return data ?? []
+    const res = await fetch(`/api/ventas?desde=${desde}&hasta=${hasta}`)
+    if (!res.ok) return []
+    return await res.json()
 }
 
 export function useEstadisticas(desde: string, hasta: string) {
@@ -129,15 +125,9 @@ export function useEstadisticas(desde: string, hasta: string) {
             setProductosMenosVendidos([...prodArr].sort((a, b) => a.total_vendido - b.total_vendido).slice(0, 5))
 
             // ── 4. Clientes top ──
-            const { data: ventasCliente } = await supabase
-                .from('ventas')
-                .select('total, cliente:clientes(nombre)')
-                .gte('fecha', desde + 'T00:00:00')
-                .lte('fecha', hasta + 'T23:59:59')
-                .not('cliente_id', 'is', null)
-
             const porCliente: Record<string, ClienteStat> = {}
-                ; (ventasCliente ?? []).forEach((v: any) => {
+                ; (ventasRango ?? []).forEach((v: any) => {
+                    if (!v.cliente_id) return
                     const nombre = v.cliente?.nombre ?? 'Desconocido'
                     if (!porCliente[nombre]) porCliente[nombre] = { nombre, total_compras: 0, monto_total: 0 }
                     porCliente[nombre].total_compras += 1
@@ -148,12 +138,11 @@ export function useEstadisticas(desde: string, hasta: string) {
             )
 
             // ── 5. Productos agotados ──
-            const { count } = await supabase
-                .from('productos')
-                .select('id', { count: 'exact' })
-                .eq('cantidad', 0)
-                .eq('activo', true)
-            setProductosAgotados(count ?? 0)
+            const resProd = await fetch('/api/productos?activos=true')
+            if (resProd.ok) {
+                const todos = await resProd.json() as { cantidad: number }[]
+                setProductosAgotados(todos.filter(p => p.cantidad <= 0).length)
+            }
 
         } finally {
             setLoading(false)

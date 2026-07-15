@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import {
-  getProductos, crearProducto, actualizarProducto, eliminarProducto,
-} from '@/lib/db'
+import { getProductos } from '@/lib/db'
+import { crearProductoAPI, actualizarProductoAPI, eliminarProductoAPI } from '@/lib/api'
 import type { Producto, ProductoInsert } from '@/types'
 
 export function useProductos() {
@@ -22,12 +21,12 @@ export function useProductos() {
   useEffect(() => { cargar() }, [cargar])
 
   async function crear(data: ProductoInsert) {
-    await crearProducto(data)
+    await crearProductoAPI(data)
     await cargar()
   }
 
   async function actualizar(id: string, data: ProductoInsert) {
-    await actualizarProducto(id, data)
+    await actualizarProductoAPI(id, data)
     await cargar()
   }
 
@@ -38,7 +37,7 @@ export function useProductos() {
 
   async function confirmarEliminar() {
     if (!pendienteEliminar) return
-    await eliminarProducto(pendienteEliminar.id)
+    await eliminarProductoAPI(pendienteEliminar.id)
     setPendienteEliminar(null)
     await cargar()
   }

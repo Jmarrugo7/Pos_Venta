@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 
 interface Stats {
   ventasHoy: number
@@ -53,55 +52,11 @@ export default function DashboardPage() {
   useEffect(() => {
     async function cargar() {
       try {
-        // Ventas de hoy
-        const hoy = new Date().toISOString().split('T')[0]
-        const { data: ventasHoyData } = await supabase
-          .from('ventas')
-          .select('total')
-          .gte('fecha', hoy)
-
-        // Ventas de la semana
-        const inicioSemana = new Date()
-        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay())
-        const { data: ventasSemanaData } = await supabase
-          .from('ventas')
-          .select('total')
-          .gte('fecha', inicioSemana.toISOString())
-
-        // Ventas del mes
-        const inicioMes = new Date()
-        inicioMes.setDate(1)
-        const { data: ventasMesData } = await supabase
-          .from('ventas')
-          .select('total')
-          .gte('fecha', inicioMes.toISOString())
-
-        // Productos agotados
-        const { count: agotados } = await supabase
-          .from('productos')
-          .select('*', { count: 'exact', head: true })
-          .eq('cantidad', 0)
-          .eq('activo', true)
-
-        // Clientes activos
-        const { count: clientes } = await supabase
-          .from('clientes')
-          .select('*', { count: 'exact', head: true })
-
-        // Deudas pendientes
-        const { data: deudasData } = await supabase
-          .from('clientes')
-          .select('saldo_pendiente')
-          .gt('saldo_pendiente', 0)
-
-        setStats({
-          ventasHoy: ventasHoyData?.reduce((s, v) => s + (v.total || 0), 0) || 0,
-          ventasSemana: ventasSemanaData?.reduce((s, v) => s + (v.total || 0), 0) || 0,
-          ventasMes: ventasMesData?.reduce((s, v) => s + (v.total || 0), 0) || 0,
-          productosAgotados: agotados || 0,
-          clientesActivos: clientes || 0,
-          deudasPendientes: deudasData?.reduce((s, c) => s + (c.saldo_pendiente || 0), 0) || 0,
-        })
+        const res = await fetch('/api/dashboard')
+        if (res.ok) {
+          const data = await res.json()
+          setStats(data)
+        }
       } catch (err) {
         console.error('Error cargando estadísticas:', err)
       } finally {

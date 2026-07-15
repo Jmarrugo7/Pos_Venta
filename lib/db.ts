@@ -12,11 +12,13 @@ import type {
 // ═══════════════════════════════════════════════════════════════
 
 export async function getProductos(soloActivos = false) {
-  let query = supabase.from('productos').select('*').order('nombre')
-  if (soloActivos) query = query.eq('activo', true)
-  const { data, error } = await query
-  if (error) throw error
-  return data as Producto[]
+  const url = soloActivos ? '/api/productos?activos=true' : '/api/productos'
+  const res = await fetch(url)
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al cargar productos' }))
+    throw new Error(err.error ?? 'Error al cargar productos')
+  }
+  return (await res.json()) as Producto[]
 }
 
 export async function getProductoById(id: string) {
@@ -88,10 +90,12 @@ export async function getProductosStockBajo() {
 // ═══════════════════════════════════════════════════════════════
 
 export async function getClientes() {
-  const { data, error } = await supabase
-    .from('clientes').select('*').order('nombre')
-  if (error) throw error
-  return data as Cliente[]
+  const res = await fetch('/api/clientes')
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al cargar clientes' }))
+    throw new Error(err.error ?? 'Error al cargar clientes')
+  }
+  return (await res.json()) as Cliente[]
 }
 
 export async function getClienteById(id: string) {
@@ -144,13 +148,12 @@ export async function getHistorialCliente(clienteId: string) {
 // ═══════════════════════════════════════════════════════════════
 
 export async function getVentas(limite = 50) {
-  const { data, error } = await supabase
-    .from('ventas')
-    .select('*, cliente:clientes(*), items:venta_items(*, producto:productos(*))')
-    .order('fecha', { ascending: false })
-    .limit(limite)
-  if (error) throw error
-  return data as Venta[]
+  const res = await fetch('/api/ventas')
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al cargar ventas' }))
+    throw new Error(err.error ?? 'Error al cargar ventas')
+  }
+  return (await res.json()) as Venta[]
 }
 
 export async function crearVenta(
@@ -204,13 +207,12 @@ export async function crearVenta(
 // ═══════════════════════════════════════════════════════════════
 
 export async function getMovimientos(limite = 100) {
-  const { data, error } = await supabase
-    .from('movimientos_inventario')
-    .select('*, producto:productos(*)')
-    .order('fecha', { ascending: false })
-    .limit(limite)
-  if (error) throw error
-  return data as MovimientoInventario[]
+  const res = await fetch(`/api/inventario?limite=${limite}`)
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error al cargar inventario' }))
+    throw new Error(err.error ?? 'Error al cargar inventario')
+  }
+  return (await res.json()) as MovimientoInventario[]
 }
 
 export async function registrarMovimiento(
@@ -271,39 +273,28 @@ export async function ajustarInventario(
 // ═══════════════════════════════════════════════════════════════
 
 export async function getClientesConDeuda() {
-  const { data, error } = await supabase
-    .from('clientes')
-    .select('*')
-    .gt('saldo_pendiente', 0)
-    .order('saldo_pendiente', { ascending: false })
-  if (error) throw error
-  return data as Cliente[]
+  const res = await fetch('/api/clientes')
+  if (!res.ok) throw new Error('Error al cargar clientes con deuda')
+  const data = (await res.json()) as Cliente[]
+  return data.filter(c => c.saldo_pendiente > 0).sort((a, b) => b.saldo_pendiente - a.saldo_pendiente)
 }
 
 export async function registrarAbono(clienteId: string, monto: number) {
-  // Insertar abono
-  const { error: abonoError } = await supabase
-    .from('abonos').insert({ cliente_id: clienteId, monto })
-  if (abonoError) throw abonoError
-
-  // Reducir saldo del cliente
-  const { data: cliente } = await supabase
-    .from('clientes').select('saldo_pendiente').eq('id', clienteId).single()
-  
-  const nuevoSaldo = Math.max(0, (cliente?.saldo_pendiente ?? 0) - monto)
-  await supabase.from('clientes')
-    .update({ saldo_pendiente: nuevoSaldo })
-    .eq('id', clienteId)
+  const res = await fetch('/api/abonos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ clienteId, monto })
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || 'Error al registrar abono')
+  }
 }
 
 export async function getAbonosPorCliente(clienteId: string) {
-  const { data, error } = await supabase
-    .from('abonos')
-    .select('*')
-    .eq('cliente_id', clienteId)
-    .order('fecha', { ascending: false })
-  if (error) throw error
-  return data as Abono[]
+  const res = await fetch(`/api/abonos?clienteId=${clienteId}`)
+  if (!res.ok) throw new Error('Error al cargar abonos del cliente')
+  return (await res.json()) as Abono[]
 }
 
 // ═══════════════════════════════════════════════════════════════

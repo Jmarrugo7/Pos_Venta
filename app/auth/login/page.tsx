@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { login } from '@/lib/auth'
 
 export default function LoginPage() {
@@ -52,7 +53,7 @@ export default function LoginPage() {
             <div className="relative inline-flex mb-5">
               <div className="w-20 h-20 bg-gradient-to-br from-coca-500 to-coca-700 rounded-2xl flex items-center justify-center shadow-lg shadow-coca-600/20 animate-pulse-glow">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" className="text-white drop-shadow-md">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.3"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.3" />
                   <text x="12" y="16.5" textAnchor="middle" fill="white" fontSize="14" fontWeight="900" fontFamily="Inter, sans-serif">C</text>
                 </svg>
               </div>
@@ -78,7 +79,7 @@ export default function LoginPage() {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-600 group-focus-within:text-coca-500 transition-colors">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <input
@@ -101,8 +102,8 @@ export default function LoginPage() {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-600 group-focus-within:text-coca-500 transition-colors">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="11" width="18" height="11" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect x="3" y="11" width="18" height="11" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <input
@@ -121,8 +122,8 @@ export default function LoginPage() {
             {error && (
               <div className="flex items-center gap-3 bg-coca-950/50 border border-coca-900/40 rounded-xl px-4 py-3 animate-slide-down">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-coca-400 shrink-0">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M12 8v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M12 8v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
                 <p className="text-coca-300 text-sm">{error}</p>
               </div>
@@ -140,8 +141,8 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
                     Ingresando...
                   </>
@@ -152,8 +153,32 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Línea decorativa inferior */}
-          <div className="mt-8 pt-6 border-t border-white/[0.04] text-center">
+
+
+          {/* Enlace a registro */}
+          <div className="mt-8 pt-6 border-t border-white/[0.04] text-center space-y-4">
+            <p className="text-zinc-500 text-sm">
+              ¿No tienes cuenta?{' '}
+              <Link
+                href="/auth/registro"
+                className="text-coca-400 hover:text-coca-300 font-semibold transition-colors duration-200 inline-flex items-center gap-1 group"
+              >
+                Regístrate aquí
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transform group-hover:translate-x-0.5 transition-transform duration-200"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </p>
             <p className="text-zinc-600 text-xs">
               © {new Date().getFullYear()} Coca-Cola • Sistema de gestión
             </p>

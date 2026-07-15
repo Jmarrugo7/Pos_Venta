@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Producto, Cliente, CartItem, TipoVenta } from '@/types'
+import { crearVentaAPI } from '@/lib/api'
+import { getProductos, getClientes } from '@/lib/db'
 
 export function usePOS() {
     const [productos, setProductos] = useState<Producto[]>([])
@@ -18,11 +20,11 @@ export function usePOS() {
         setLoading(true)
         try {
             const [prodRes, cliRes] = await Promise.all([
-                supabase.from('productos').select('*').eq('activo', true).gt('cantidad', 0).order('nombre'),
-                supabase.from('clientes').select('*').order('nombre')
+                getProductos(true), // soloActivos = true
+                getClientes()
             ])
-            setProductos(prodRes.data ?? [])
-            setClientes(cliRes.data ?? [])
+            setProductos(prodRes ?? [])
+            setClientes(cliRes ?? [])
         } catch (e) {
             console.error('Error cargando catálogos del POS:', e)
         } finally {
@@ -84,70 +86,7 @@ export function usePOS() {
 
         setProcesando(true)
         try {
-            // 1. Insertar la Cabecera de la Venta
-            const { data: ventaData, error: ventaError } = await supabase
-                .from('ventas')
-                .insert([{
-                    cliente_id: clienteId || null,
-                    total: totalVenta,
-                    tipo: tipoVenta,
-                    fecha: new Date().toISOString()
-                }])
-                .select()
-                .single()
-
-            if (ventaError) throw ventaError
-
-            // Mapeamos el carrito completo para hacer un Insert Masivo (Batch)
-            const itemsParaInsertar = cart.map(item => ({
-                venta_id: ventaData.id,
-                producto_id: item.producto.id,
-                cantidad: item.cantidad,
-                precio_unitario: item.producto.precio_venta
-            }))
-
-            // 🔍 CONTROL DE DEPURACIÓN: Abre la consola del navegador (F12) y revisa qué IDs viajan aquí
-            console.log('DATOS ENVIADOS A VENTAS_ITEMS:', itemsParaInsertar)
-
-            // 2. Insertar todos los ítems de una sola vez
-            const { error: itemsError } = await supabase
-                .from('venta_items')
-                .insert(itemsParaInsertar)
-
-            if (itemsError) throw itemsError // <-- Aquí saltaba tu error antiguo
-
-            // 3. Si los ítems se guardaron bien, actualizamos existencias y generamos movimientos
-            for (const item of cart) {
-                const nuevoStock = item.producto.cantidad - item.cantidad
-
-                // Actualizar stock del producto
-                await supabase
-                    .from('productos')
-                    .update({ cantidad: nuevoStock })
-                    .eq('id', item.producto.id)
-
-                // Registrar movimiento de salida
-                await supabase
-                    .from('movimientos_inventario')
-                    .insert([{
-                        producto_id: item.producto.id,
-                        tipo: 'salida',
-                        cantidad: item.cantidad,
-                        descripcion: `Venta POS Factura #${ventaData.numero_factura}`,
-                        fecha: new Date().toISOString()
-                    }])
-            }
-
-            // 4. Si la venta es a Crédito, impactar el saldo del cliente
-            if (tipoVenta === 'credito' && clienteId) {
-                const clienteActual = clientes.find(c => c.id === clienteId)
-                const nuevoSaldo = (clienteActual?.saldo_pendiente || 0) + totalVenta
-
-                await supabase
-                    .from('clientes')
-                    .update({ saldo_pendiente: nuevoSaldo })
-                    .eq('id', clienteId)
-            }
+            const { venta } = await crearVentaAPI(cart, tipoVenta, clienteId || undefined)
 
             // Limpiar el estado del POS tras un checkout exitoso
             setCart([])
@@ -155,7 +94,7 @@ export function usePOS() {
             setTipoVenta('contado')
             await cargarCatalogos()
 
-            return ventaData.numero_factura
+            return venta.numero_factura
         } catch (e) {
             console.error('Error detallado en finalizarVenta:', e)
             throw e

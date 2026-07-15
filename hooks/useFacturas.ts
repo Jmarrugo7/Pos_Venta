@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
 import type { Factura, EstadoFactura } from '@/types/facturas'
+import { getVentas } from '@/lib/db'
 
 interface FiltrosFactura {
     busqueda: string
@@ -22,11 +22,8 @@ export function useFacturas() {
     const cargar = useCallback(async () => {
         setLoading(true)
         try {
-            const { data } = await supabase
-                .from('ventas')
-                .select('*, cliente:clientes(nombre), items:venta_items(*, producto:productos(nombre, costo_compra))')
-                .order('numero_factura', { ascending: false })
-            setFacturas((data ?? []) as Factura[])
+            const data = await getVentas()
+            setFacturas(data)
         } finally {
             setLoading(false)
         }
@@ -35,11 +32,15 @@ export function useFacturas() {
     useEffect(() => { cargar() }, [cargar])
 
     async function anularFactura(id: string, motivo: string) {
-        const { error } = await supabase.rpc('anular_factura', {
-            p_venta_id: id,
-            p_motivo: motivo,
+        const res = await fetch('/api/ventas', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, motivo })
         })
-        if (error) throw new Error(error.message)
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'Error al anular la factura')
+        }
         await cargar()
     }
 

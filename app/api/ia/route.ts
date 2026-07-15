@@ -1,14 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 // Inicializar Gemini y Supabase
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+const supabase = getSupabaseAdmin()
 
 // ── Herramientas estructuradas para Gemini (Function Declarations) ───────────
 const tools = [

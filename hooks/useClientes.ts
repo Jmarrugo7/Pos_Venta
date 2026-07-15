@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
 import type { Cliente } from '@/types'
+import { crearClienteAPI, actualizarClienteAPI, eliminarClienteAPI } from '@/lib/api'
+import { getClientes } from '@/lib/db'
 
 export function useClientes() {
     const [clientes, setClientes] = useState<Cliente[]>([])
@@ -10,15 +11,7 @@ export function useClientes() {
         setLoading(true)
         try {
             // Traemos los clientes junto con la fecha de su última venta para calcular vigencia
-            const { data, error } = await supabase
-                .from('clientes')
-                .select(`
-          *,
-          ventas (fecha)
-        `)
-                .order('nombre')
-
-            if (error) throw error
+            const data = await getClientes()
 
             // Mapeamos y calculamos si está activo basado en compras del último mes
             const clientesProcesados = (data ?? []).map((c: any) => {
@@ -48,29 +41,18 @@ export function useClientes() {
     useEffect(() => { cargar() }, [cargar])
 
     async function registrarCliente(nombre: string) {
-        const { error } = await supabase
-            .from('clientes')
-            .insert([{ nombre, saldo_pendiente: 0 }])
-        if (error) throw error
+        await crearClienteAPI(nombre)
         await cargar()
     }
 
     async function editarCliente(id: string, nombre: string, saldoPendiente: number) {
-        const { error } = await supabase
-            .from('clientes')
-            .update({ nombre, saldo_pendiente: saldoPendiente })
-            .eq('id', id)
-        if (error) throw error
+        await actualizarClienteAPI(id, nombre, saldoPendiente)
         await cargar()
     }
 
     async function eliminarCliente(id: string) {
         try {
-            const { error } = await supabase
-                .from('clientes')
-                .delete()
-                .eq('id', id)
-            if (error) throw new Error(error.message)
+            await eliminarClienteAPI(id)
             await cargar()
         } catch (e: any) {
             const msg = e?.message ?? 'Error desconocido al eliminar cliente'

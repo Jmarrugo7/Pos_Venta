@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Modal, Input, Button } from '@/components/ui'
-import { supabase } from '@/lib/supabase'
 import type { Producto } from '@/types'
 
 interface FormEntradaProps {
@@ -20,8 +19,10 @@ export function FormEntrada({ abierto, onGuardar, onCerrar }: FormEntradaProps) 
     const [error, setError] = useState('')
 
     useEffect(() => {
-        supabase.from('productos').select('*').eq('activo', true).order('nombre')
-            .then(({ data }) => setProductos(data ?? []))
+        fetch('/api/productos?activos=true')
+            .then(r => r.ok ? r.json() : [])
+            .then(data => setProductos(data ?? []))
+            .catch(() => setProductos([]))
     }, [])
 
     useEffect(() => {

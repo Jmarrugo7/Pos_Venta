@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Producto, CartItem, TipoVenta } from '@/types'
+import { crearVentaAPI } from '@/lib/api'
 
 export function useCarrito() {
   const [cart, setCart] = useState<CartItem[]>([])

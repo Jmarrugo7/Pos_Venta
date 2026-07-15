@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Modal, LoadingRows, EmptyState, Badge } from '@/components/ui'
-import { supabase } from '@/lib/supabase'
 import { formatCOP } from '@/lib/utils'
 import type { Cliente, Venta } from '@/types'
 
@@ -21,13 +20,9 @@ export function ModalHistorial({ cliente, onCerrar }: ModalHistorialProps) {
         async function cargarHistorial() {
             setLoading(true)
             try {
-                const { data, error } = await supabase
-                    .from('ventas')
-                    .select('*')
-                    .eq('cliente_id', cliente?.id)
-                    .order('fecha', { ascending: false })
-
-                if (error) throw error
+                const res = await fetch(`/api/ventas?clienteId=${cliente?.id}`)
+                if (!res.ok) throw new Error('Error al cargar historial')
+                const data = await res.json()
                 setVentas(data ?? [])
             } catch (e) {
                 console.error(e)
@@ -37,7 +32,7 @@ export function ModalHistorial({ cliente, onCerrar }: ModalHistorialProps) {
         }
 
         cargarHistorial()
-    }, [cliente]) // El arreglo de dependencias ahora cierra correctamente el useEffect
+    }, [cliente])
 
     return (
         <Modal abierto={!!cliente} onCerrar={onCerrar} titulo={`Historial de compras — ${cliente?.nombre}`}>
