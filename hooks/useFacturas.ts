@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { Factura, EstadoFactura } from '@/types/facturas'
-import { getVentas } from '@/lib/db'
+import { getVentas, fetchConAuth } from '@/lib/db'
 
 interface FiltrosFactura {
     busqueda: string
@@ -32,7 +32,7 @@ export function useFacturas() {
     useEffect(() => { cargar() }, [cargar])
 
     async function anularFactura(id: string, motivo: string) {
-        const res = await fetch('/api/ventas', {
+        const res = await fetchConAuth('/api/ventas', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, motivo })

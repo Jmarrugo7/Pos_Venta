@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
 import type { TipoVenta, CartItem } from '@/types'
+
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
 
 export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
         const { searchParams } = new URL(req.url)
         const clienteId = searchParams.get('clienteId')
         const desde = searchParams.get('desde')
@@ -52,7 +56,7 @@ export async function POST(req: NextRequest) {
         if (tipo === 'credito' && !clienteId)
             return NextResponse.json({ error: 'Una venta a crédito requiere un cliente' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         // ── Verificar stock antes de proceder ────────────────────
         for (const item of items) {
@@ -153,7 +157,7 @@ export async function PUT(req: NextRequest) {
         if (!id) return NextResponse.json({ error: 'ID de venta requerido' }, { status: 400 })
         if (!motivo) return NextResponse.json({ error: 'Motivo de anulación requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         // Obtener la venta con sus items
         const { data: venta, error: ventaErr } = await db

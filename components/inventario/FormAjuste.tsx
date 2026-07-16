@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Modal, Input, Button } from '@/components/ui'
+import { fetchConAuth } from '@/lib/db'
 import type { Producto } from '@/types'
 
 interface FormAjusteProps {
@@ -19,7 +20,7 @@ export function FormAjuste({ abierto, onGuardar, onCerrar }: FormAjusteProps) {
     const [error, setError] = useState('')
 
     useEffect(() => {
-        fetch('/api/productos?activos=true')
+        fetchConAuth('/api/productos?activos=true')
             .then(r => r.ok ? r.json() : [])
             .then(data => setProductos(data ?? []))
             .catch(() => setProductos([]))

@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
 
-export async function GET() {
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
+
+export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         // Ventas de hoy
         const hoy = new Date().toISOString().split('T')[0]
@@ -11,6 +15,7 @@ export async function GET() {
             .from('ventas')
             .select('total')
             .gte('fecha', hoy)
+            .neq('estado', 'anulada')
 
         // Ventas de la semana
         const inicioSemana = new Date()
@@ -19,6 +24,7 @@ export async function GET() {
             .from('ventas')
             .select('total')
             .gte('fecha', inicioSemana.toISOString())
+            .neq('estado', 'anulada')
 
         // Ventas del mes
         const inicioMes = new Date()
@@ -27,6 +33,7 @@ export async function GET() {
             .from('ventas')
             .select('total')
             .gte('fecha', inicioMes.toISOString())
+            .neq('estado', 'anulada')
 
         // Productos agotados
         const { count: agotados } = await db

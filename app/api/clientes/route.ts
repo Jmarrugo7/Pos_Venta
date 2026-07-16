@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
 
-export async function GET() {
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
+
+export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
         const { data, error } = await db.from('clientes').select('*, ventas(fecha)').order('nombre')
         if (error) throw new Error(error.message)
         return NextResponse.json(data)
@@ -18,7 +22,7 @@ export async function POST(req: NextRequest) {
         const { nombre, saldo_pendiente } = await req.json()
         if (!nombre) return NextResponse.json({ error: 'Nombre requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { data, error } = await db
             .from('clientes')
@@ -39,7 +43,7 @@ export async function PUT(req: NextRequest) {
         const { id, ...updates } = await req.json()
         if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { data, error } = await db
             .from('clientes')
@@ -61,7 +65,7 @@ export async function DELETE(req: NextRequest) {
         const { id } = await req.json()
         if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { error } = await db
             .from('clientes')

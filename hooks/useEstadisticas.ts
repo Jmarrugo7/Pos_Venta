@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { fetchConAuth } from '@/lib/db'
 import { fechaHoy, inicioSemana, inicioMes } from '@/lib/utils'
 
 export interface ResumenStats {
@@ -49,9 +49,10 @@ function sumaTotal(rows: any[] | null): number {
 }
 
 async function queryVentasConItems(desde: string, hasta: string) {
-    const res = await fetch(`/api/ventas?desde=${desde}&hasta=${hasta}`)
+    const res = await fetchConAuth(`/api/ventas?desde=${desde}&hasta=${hasta}`)
     if (!res.ok) return []
-    return await res.json()
+    const data = await res.json()
+    return data.filter((v: any) => v.estado !== 'anulada')
 }
 
 export function useEstadisticas(desde: string, hasta: string) {
@@ -138,7 +139,7 @@ export function useEstadisticas(desde: string, hasta: string) {
             )
 
             // ── 5. Productos agotados ──
-            const resProd = await fetch('/api/productos?activos=true')
+            const resProd = await fetchConAuth('/api/productos?activos=true')
             if (resProd.ok) {
                 const todos = await resProd.json() as { cantidad: number }[]
                 setProductosAgotados(todos.filter(p => p.cantidad <= 0).length)

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Modal, LoadingRows, EmptyState, Badge } from '@/components/ui'
 import { formatCOP } from '@/lib/utils'
+import { fetchConAuth } from '@/lib/db'
 import type { Cliente, Venta } from '@/types'
 
 interface ModalHistorialProps {
@@ -20,7 +21,7 @@ export function ModalHistorial({ cliente, onCerrar }: ModalHistorialProps) {
         async function cargarHistorial() {
             setLoading(true)
             try {
-                const res = await fetch(`/api/ventas?clienteId=${cliente?.id}`)
+                const res = await fetchConAuth(`/api/ventas?clienteId=${cliente?.id}`)
                 if (!res.ok) throw new Error('Error al cargar historial')
                 const data = await res.json()
                 setVentas(data ?? [])

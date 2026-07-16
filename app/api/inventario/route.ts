@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
+
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
 
 export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
         const { searchParams } = new URL(req.url)
         const limite = parseInt(searchParams.get('limite') || '100', 10)
         
@@ -26,7 +30,7 @@ export async function POST(req: NextRequest) {
         if (!productoId || !cantidad || cantidad <= 0)
             return NextResponse.json({ error: 'productoId y cantidad (> 0) son requeridos' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         // Obtener cantidad actual
         const { data: producto } = await db

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
+
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
 
 export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
         const { searchParams } = new URL(req.url)
         const clienteId = searchParams.get('clienteId')
         
@@ -30,7 +34,7 @@ export async function POST(req: NextRequest) {
         if (!clienteId || !monto || monto <= 0)
             return NextResponse.json({ error: 'clienteId y monto (> 0) son requeridos' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         // Insertar abono
         const { error: abonoError } = await db

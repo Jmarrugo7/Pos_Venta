@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { fetchConAuth } from '@/lib/db'
 
 export interface Mensaje {
     id: string
@@ -33,7 +34,7 @@ export function useChat() {
         setCargando(true)
 
         try {
-            const res = await fetch('/api/ia', {
+            const res = await fetchConAuth('/api/ia', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

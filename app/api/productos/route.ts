@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
+
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
 
 export async function GET(req: NextRequest) {
     try {
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
         const { searchParams } = new URL(req.url)
         const soloActivos = searchParams.get('activos') === 'true'
 
@@ -22,7 +26,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const producto = await req.json()
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { data, error } = await db
             .from('productos')
@@ -43,7 +47,7 @@ export async function PUT(req: NextRequest) {
         const { id, ...updates } = await req.json()
         if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { data, error } = await db
             .from('productos')
@@ -65,7 +69,7 @@ export async function DELETE(req: NextRequest) {
         const { id } = await req.json()
         if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-        const db = getSupabaseAdmin()
+        const db = getSupabaseServer(getToken(req))
 
         const { error } = await db
             .from('productos')

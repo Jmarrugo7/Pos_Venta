@@ -7,13 +7,26 @@ import type {
   Abono,
 } from '@/types'
 
+export async function fetchConAuth(url: string, options: RequestInit = {}) {
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
+
+  return fetch(url, {
+      ...options,
+      headers: {
+          ...options.headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+  })
+}
+
 // ═══════════════════════════════════════════════════════════════
 // PRODUCTOS
 // ═══════════════════════════════════════════════════════════════
 
 export async function getProductos(soloActivos = false) {
   const url = soloActivos ? '/api/productos?activos=true' : '/api/productos'
-  const res = await fetch(url)
+  const res = await fetchConAuth(url)
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al cargar productos' }))
     throw new Error(err.error ?? 'Error al cargar productos')
@@ -90,7 +103,7 @@ export async function getProductosStockBajo() {
 // ═══════════════════════════════════════════════════════════════
 
 export async function getClientes() {
-  const res = await fetch('/api/clientes')
+  const res = await fetchConAuth('/api/clientes')
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al cargar clientes' }))
     throw new Error(err.error ?? 'Error al cargar clientes')
@@ -148,7 +161,7 @@ export async function getHistorialCliente(clienteId: string) {
 // ═══════════════════════════════════════════════════════════════
 
 export async function getVentas(limite = 50) {
-  const res = await fetch('/api/ventas')
+  const res = await fetchConAuth('/api/ventas')
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al cargar ventas' }))
     throw new Error(err.error ?? 'Error al cargar ventas')
@@ -207,7 +220,7 @@ export async function crearVenta(
 // ═══════════════════════════════════════════════════════════════
 
 export async function getMovimientos(limite = 100) {
-  const res = await fetch(`/api/inventario?limite=${limite}`)
+  const res = await fetchConAuth(`/api/inventario?limite=${limite}`)
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Error al cargar inventario' }))
     throw new Error(err.error ?? 'Error al cargar inventario')
@@ -273,14 +286,14 @@ export async function ajustarInventario(
 // ═══════════════════════════════════════════════════════════════
 
 export async function getClientesConDeuda() {
-  const res = await fetch('/api/clientes')
+  const res = await fetchConAuth('/api/clientes')
   if (!res.ok) throw new Error('Error al cargar clientes con deuda')
   const data = (await res.json()) as Cliente[]
   return data.filter(c => c.saldo_pendiente > 0).sort((a, b) => b.saldo_pendiente - a.saldo_pendiente)
 }
 
 export async function registrarAbono(clienteId: string, monto: number) {
-  const res = await fetch('/api/abonos', {
+  const res = await fetchConAuth('/api/abonos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ clienteId, monto })
@@ -292,7 +305,7 @@ export async function registrarAbono(clienteId: string, monto: number) {
 }
 
 export async function getAbonosPorCliente(clienteId: string) {
-  const res = await fetch(`/api/abonos?clienteId=${clienteId}`)
+  const res = await fetchConAuth(`/api/abonos?clienteId=${clienteId}`)
   if (!res.ok) throw new Error('Error al cargar abonos del cliente')
   return (await res.json()) as Abono[]
 }

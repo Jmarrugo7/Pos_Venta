@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { getMovimientos } from '@/lib/db'
+import { getMovimientos, fetchConAuth } from '@/lib/db'
 import type { MovimientoInventario, Producto } from '@/types'
 import { registrarEntradaAPI, ajustarInventarioAPI } from '@/lib/api'
 
@@ -15,7 +15,7 @@ export function useInventario() {
             const movs = await getMovimientos(100)
             setMovimientos(movs)
 
-            const res = await fetch('/api/productos?activos=true')
+            const res = await fetchConAuth('/api/productos?activos=true')
             if (res.ok) {
                 const todos = await res.json() as Producto[]
                 const bajos = todos.filter(p => p.cantidad <= p.cantidad_minima)

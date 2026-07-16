@@ -1,10 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { getSupabaseServer } from '@/lib/getSupabaseServer'
 
-// Inicializar Gemini y Supabase
+function getToken(req: NextRequest) {
+    return req.headers.get('Authorization')?.replace('Bearer ', '') || ''
+}
+
+// Inicializar Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const supabase = getSupabaseAdmin()
 
 // ── Herramientas estructuradas para Gemini (Function Declarations) ───────────
 const tools = [
@@ -78,7 +81,7 @@ const tools = [
 ] as any
 
 // ── Ejecutores de herramientas (Se mantiene igual) ───────────────────────────
-async function ejecutarHerramienta(nombre: string, input: any): Promise<string> {
+async function ejecutarHerramienta(nombre: string, input: any, supabase: any): Promise<string> {
     try {
         switch (nombre) {
             case 'buscar_productos': {
@@ -176,17 +179,17 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
                 switch (input.tipo) {
                     case 'ventas_hoy': {
                         const { data } = await supabase.from('ventas').select('total').gte('fecha', hoy)
-                        const total = data?.reduce((s, r) => s + r.total, 0) ?? 0
+                        const total = data?.reduce((s: any, r: any) => s + r.total, 0) ?? 0
                         return `Ventas de hoy: $${total.toLocaleString('es-CO')}`
                     }
                     case 'ventas_semana': {
                         const { data } = await supabase.from('ventas').select('total').gte('fecha', semana)
-                        const total = data?.reduce((s, r) => s + r.total, 0) ?? 0
+                        const total = data?.reduce((s: any, r: any) => s + r.total, 0) ?? 0
                         return `Ventas de esta semana: $${total.toLocaleString('es-CO')}`
                     }
                     case 'ventas_mes': {
                         const { data } = await supabase.from('ventas').select('total').gte('fecha', mes)
-                        const total = data?.reduce((s, r) => s + r.total, 0) ?? 0
+                        const total = data?.reduce((s: any, r: any) => s + r.total, 0) ?? 0
                         return `Ventas de este mes: $${total.toLocaleString('es-CO')}`
                     }
                     case 'deuda_cliente': {
@@ -195,7 +198,7 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
                             .select('nombre, saldo_pendiente')
                             .ilike('nombre', `%${input.cliente_nombre}%`)
                         if (!data?.length) return `No encontré al cliente "${input.cliente_nombre}"`
-                        return data.map(c => `${c.nombre}: $${c.saldo_pendiente.toLocaleString('es-CO')}`).join('\n')
+                        return data.map((c: any) => `${c.nombre}: $${c.saldo_pendiente.toLocaleString('es-CO')}`).join('\n')
                     }
                     case 'productos_agotados': {
                         const { data } = await supabase
@@ -204,7 +207,7 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
                             .eq('cantidad', 0)
                             .eq('activo', true)
                         if (!data?.length) return 'No hay productos agotados actualmente.'
-                        return `Productos agotados: ${data.map(p => p.nombre).join(', ')}`
+                        return `Productos agotados: ${data.map((p: any) => p.nombre).join(', ')}`
                     }
                     case 'productos_stock_bajo': {
                         const { data } = await supabase
@@ -212,9 +215,9 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
                             .select('nombre, cantidad, cantidad_minima')
                             .eq('activo', true)
                             .gt('cantidad', 0)
-                        const bajos = (data ?? []).filter(p => p.cantidad <= p.cantidad_minima)
+                        const bajos = (data ?? []).filter((p: any) => p.cantidad <= p.cantidad_minima)
                         if (!bajos.length) return 'Todos los productos tienen stock suficiente.'
-                        return `Productos con stock bajo:\n${bajos.map(p => `- ${p.nombre}: ${p.cantidad} und (mínimo: ${p.cantidad_minima})`).join('\n')}`
+                        return `Productos con stock bajo:\n${bajos.map((p: any) => `- ${p.nombre}: ${p.cantidad} und (mínimo: ${p.cantidad_minima})`).join('\n')}`
                     }
                     case 'deudas_totales': {
                         const { data } = await supabase
@@ -223,8 +226,8 @@ async function ejecutarHerramienta(nombre: string, input: any): Promise<string> 
                             .gt('saldo_pendiente', 0)
                             .order('saldo_pendiente', { ascending: false })
                         if (!data?.length) return 'No hay deudas pendientes.'
-                        const total = data.reduce((s, c) => s + c.saldo_pendiente, 0)
-                        const lista = data.map(c => `- ${c.nombre}: $${c.saldo_pendiente.toLocaleString('es-CO')}`).join('\n')
+                        const total = data.reduce((s: any, c: any) => s + c.saldo_pendiente, 0)
+                        const lista = data.map((c: any) => `- ${c.nombre}: $${c.saldo_pendiente.toLocaleString('es-CO')}`).join('\n')
                         return `Total deudas: $${total.toLocaleString('es-CO')}\n\n${lista}`
                     }
                 }
@@ -273,6 +276,9 @@ export async function POST(req: NextRequest) {
             tools: tools,
         })
 
+        // Instanciar supabase para el request actual
+        const supabase = getSupabaseServer(getToken(req))
+
         // Construir el historial formateado
         let historialPrevio = messages.slice(0, -1).map((m: any) => ({
             role: m.role === 'assistant' ? 'model' : 'user',
@@ -300,7 +306,7 @@ export async function POST(req: NextRequest) {
         while (functionCalls && functionCalls.length > 0) {
             const toolResults = await Promise.all(
                 functionCalls.map(async (call: any) => { // <-- Tipado explícito 'any' para evitar quejas de TS
-                    const resultado = await ejecutarHerramienta(call.name, call.args)
+                    const resultado = await ejecutarHerramienta(call.name, call.args, supabase)
 
                     if (call.name === 'crear_venta' && !resultado.includes('Error:')) {
                         ventaCreada = true

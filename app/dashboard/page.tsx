@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { fetchConAuth } from '@/lib/db'
 
 interface Stats {
   ventasHoy: number
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function cargar() {
       try {
-        const res = await fetch('/api/dashboard')
+        const res = await fetchConAuth('/api/dashboard')
         if (res.ok) {
           const data = await res.json()
           setStats(data)
