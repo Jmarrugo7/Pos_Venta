@@ -55,7 +55,7 @@ export default function ClientesPage() {
         if (clienteEdicion) {
             await editarCliente(clienteEdicion.id, nombre, saldo)
         } else {
-            await registrarCliente(nombre)
+            await registrarCliente(nombre, saldo)
         }
     }
 

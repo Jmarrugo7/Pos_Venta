@@ -40,8 +40,8 @@ export function useClientes() {
 
     useEffect(() => { cargar() }, [cargar])
 
-    async function registrarCliente(nombre: string) {
-        await crearClienteAPI(nombre)
+    async function registrarCliente(nombre: string, saldo_pendiente: number = 0) {
+        await crearClienteAPI(nombre, saldo_pendiente)
         await cargar()
     }
 

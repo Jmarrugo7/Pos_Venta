@@ -19,14 +19,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { nombre, saldo_pendiente } = await req.json()
+        const body = await req.json()
+        console.log('POST /api/clientes body:', body)
+        const { nombre, saldo_pendiente } = body
         if (!nombre) return NextResponse.json({ error: 'Nombre requerido' }, { status: 400 })
 
         const db = getSupabaseServer(getToken(req))
 
+        const saldoNum = typeof saldo_pendiente === 'number' ? saldo_pendiente : Number(saldo_pendiente) || 0;
+
         const { data, error } = await db
             .from('clientes')
-            .insert({ nombre, saldo_pendiente: saldo_pendiente ?? 0 })
+            .insert({ nombre, saldo_pendiente: saldoNum })
             .select()
             .single()
 
