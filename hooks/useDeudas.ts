@@ -23,7 +23,7 @@ export function useDeudas() {
         await cargar()
     }
 
-    const totalDeuda = clientes.reduce((s, c) => s + c.saldo_pendiente, 0)
+    const totalDeuda = clientes.reduce((s, c) => s + (c.saldo_pendiente > 0 ? c.saldo_pendiente : 0), 0)
 
     return { clientes, loading, totalDeuda, cargar, abonar }
 }

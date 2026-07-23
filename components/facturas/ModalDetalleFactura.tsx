@@ -27,7 +27,7 @@ export function ModalDetalleFactura({ factura, onCerrar, onDescargarPDF, onImpri
     return (
         <>
             <div className="fixed inset-0 bg-black/70 z-40" onClick={onCerrar} />
-            <div className="fixed right-0 top-0 h-full w-full max-w-lg bg-gray-900 border-l border-gray-800 z-50 flex flex-col shadow-2xl overflow-y-auto">
+            <div className="fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto h-full w-full sm:max-w-lg bg-gray-900 border-l border-gray-800 z-50 flex flex-col shadow-2xl overflow-y-auto">
 
                 {/* Header */}
                 <div className="bg-red-600 p-6">
@@ -48,7 +48,7 @@ export function ModalDetalleFactura({ factura, onCerrar, onDescargarPDF, onImpri
 
                 <div className="p-6 space-y-6 flex-1">
                     {/* Info cliente y pago */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="bg-gray-800 rounded-xl p-4">
                             <p className="text-gray-500 text-xs uppercase tracking-wider mb-1">Cliente</p>
                             <p className="text-white font-semibold">

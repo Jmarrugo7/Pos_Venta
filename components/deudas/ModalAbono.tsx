@@ -39,7 +39,7 @@ export function ModalAbono({ abierto, cliente, onAbonar, onCerrar }: ModalAbonoP
         const valor = Number(monto)
         if (!valor || valor <= 0) return setError('Ingresa un monto válido')
         if (!cliente) return
-        if (valor > cliente.saldo_pendiente) return setError(`El monto supera la deuda (${formatCOP(cliente.saldo_pendiente)})`)
+
 
         setPagando(true)
         setError('')
@@ -102,14 +102,14 @@ export function ModalAbono({ abierto, cliente, onAbonar, onCerrar }: ModalAbonoP
             </div>
 
             {/* Preview saldo restante */}
-            {Number(monto) > 0 && Number(monto) <= cliente.saldo_pendiente && (
-                <div className={`rounded-lg px-4 py-3 text-sm flex justify-between mb-4 ${saldoRestante === 0
+            {Number(monto) > 0 && (
+                <div className={`rounded-lg px-4 py-3 text-sm flex justify-between mb-4 ${saldoRestante <= 0
                         ? 'bg-green-950 border border-green-900'
                         : 'bg-gray-800 border border-gray-700'
                     }`}>
-                    <span className="text-gray-400">Saldo restante</span>
-                    <span className={`font-bold ${saldoRestante === 0 ? 'text-green-400' : 'text-white'}`}>
-                        {saldoRestante === 0 ? '✓ Saldado' : formatCOP(saldoRestante)}
+                    <span className="text-gray-400">{saldoRestante < 0 ? 'Nuevo saldo a favor' : 'Saldo restante'}</span>
+                    <span className={`font-bold ${saldoRestante <= 0 ? 'text-green-400' : 'text-white'}`}>
+                        {saldoRestante < 0 ? `✓ ${formatCOP(Math.abs(saldoRestante))}` : saldoRestante === 0 ? '✓ Saldado' : formatCOP(saldoRestante)}
                     </span>
                 </div>
             )}

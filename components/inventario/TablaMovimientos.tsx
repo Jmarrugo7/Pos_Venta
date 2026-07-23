@@ -27,28 +27,63 @@ interface TablaMovimientosProps {
 }
 
 export function TablaMovimientos({ movimientos, loading }: TablaMovimientosProps) {
-    return (
-        <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-                <thead>
-                    <tr className="text-gray-500 border-b border-gray-800 text-left">
-                        {['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Descripción'].map(h => (
-                            <th key={h} className="pb-3 pr-4 font-medium whitespace-nowrap">{h}</th>
-                        ))}
-                    </tr>
-                </thead>
-
-                {loading ? (
-                    <LoadingRows cols={5} />
-                ) : movimientos.length === 0 ? (
-                    <tbody>
-                        <tr>
-                            <td colSpan={5}>
-                                <EmptyState mensaje="No hay movimientos registrados" icono="🏭" />
-                            </td>
+    if (loading) {
+        return (
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="text-gray-500 border-b border-gray-800 text-left">
+                            {['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Descripción'].map(h => (
+                                <th key={h} className="pb-3 pr-4 font-medium whitespace-nowrap">{h}</th>
+                            ))}
                         </tr>
-                    </tbody>
-                ) : (
+                    </thead>
+                    <LoadingRows cols={5} />
+                </table>
+            </div>
+        )
+    }
+
+    if (movimientos.length === 0) {
+        return <EmptyState mensaje="No hay movimientos registrados" icono="🏭" />
+    }
+
+    return (
+        <>
+            {/* ── Vista móvil: tarjetas ─────────────────────────────────── */}
+            <div className="md:hidden space-y-3">
+                {movimientos.map(m => (
+                    <div key={m.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="text-white font-medium text-sm">{m.producto?.nombre ?? '—'}</p>
+                            <div className="shrink-0">{badgeTipo(m.tipo)}</div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-500 text-xs">{formatFechaCorta(m.fecha)}</span>
+                            <span className={`font-bold text-sm ${
+                                m.tipo === 'entrada' ? 'text-green-400' :
+                                m.tipo === 'salida' ? 'text-red-400' : 'text-blue-400'
+                            }`}>
+                                {m.tipo === 'entrada' ? '+' : m.tipo === 'salida' ? '−' : '⇄'}{m.cantidad}
+                            </span>
+                        </div>
+                        {m.descripcion && (
+                            <p className="text-gray-600 text-xs mt-1.5 truncate">{m.descripcion}</p>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* ── Vista desktop: tabla ──────────────────────────────────── */}
+            <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="text-gray-500 border-b border-gray-800 text-left">
+                            {['Fecha', 'Producto', 'Tipo', 'Cantidad', 'Descripción'].map(h => (
+                                <th key={h} className="pb-3 pr-4 font-medium whitespace-nowrap">{h}</th>
+                            ))}
+                        </tr>
+                    </thead>
                     <tbody className="divide-y divide-gray-800">
                         {movimientos.map(m => (
                             <tr key={m.id} className="text-gray-300">
@@ -70,8 +105,8 @@ export function TablaMovimientos({ movimientos, loading }: TablaMovimientosProps
                             </tr>
                         ))}
                     </tbody>
-                )}
-            </table>
-        </div>
+                </table>
+            </div>
+        </>
     )
 }

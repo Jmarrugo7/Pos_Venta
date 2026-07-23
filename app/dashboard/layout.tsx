@@ -142,21 +142,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </header>
 
-        {/* Menú móvil desplegable */}
+        {/* Menú móvil — drawer overlay */}
         {menuAbierto && (
-          <div className="md:hidden glass border-b border-white/[0.04] px-3 pb-3 space-y-1 animate-slide-down">
-            {NAV_ITEMS.map(item => (
-              <NavLink key={item.href} {...item} onClick={() => setMenuAbierto(false)} />
-            ))}
-            <div className="pt-2 mt-2 border-t border-white/[0.04]">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-500 hover:text-coca-400 rounded-xl text-sm transition-all"
-              >
-                <span>🚪</span> Cerrar sesión
-              </button>
+          <>
+            {/* Backdrop */}
+            <div
+              className="md:hidden fixed inset-0 bg-black/60 z-40"
+              onClick={() => setMenuAbierto(false)}
+            />
+            {/* Drawer */}
+            <div className="md:hidden fixed top-0 left-0 h-full w-72 max-w-[85vw] glass border-r border-white/[0.04] z-50 flex flex-col shadow-2xl animate-slide-left overflow-y-auto">
+              {/* Logo drawer */}
+              <div className="p-5 border-b border-white/[0.04] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gradient-to-br from-coca-500 to-coca-700 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-black text-sm">C</span>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">Coca-Cola</p>
+                    <p className="text-zinc-600 text-xs">Sistema de ventas</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMenuAbierto(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-white hover:bg-white/[0.04] transition-all"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Nav items */}
+              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                {NAV_ITEMS.map(item => (
+                  <NavLink key={item.href} {...item} onClick={() => setMenuAbierto(false)} />
+                ))}
+              </nav>
+              {/* Cerrar sesión */}
+              <div className="p-3 border-t border-white/[0.04]">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-zinc-500 hover:text-coca-400 hover:bg-coca-950/30 rounded-xl text-sm font-medium transition-all duration-200 group"
+                >
+                  <span className="group-hover:scale-110 transition-transform duration-200">🚪</span>
+                  Cerrar sesión
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Página */}

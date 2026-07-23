@@ -289,7 +289,7 @@ export async function getClientesConDeuda() {
   const res = await fetchConAuth('/api/clientes')
   if (!res.ok) throw new Error('Error al cargar clientes con deuda')
   const data = (await res.json()) as Cliente[]
-  return data.filter(c => c.saldo_pendiente > 0).sort((a, b) => b.saldo_pendiente - a.saldo_pendiente)
+  return data.filter(c => c.saldo_pendiente !== 0).sort((a, b) => b.saldo_pendiente - a.saldo_pendiente)
 }
 
 export async function registrarAbono(clienteId: string, monto: number) {

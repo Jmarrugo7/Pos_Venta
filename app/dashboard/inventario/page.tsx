@@ -36,11 +36,11 @@ export default function InventarioPage() {
                 titulo="Movimientos"
                 subtitulo={`${movimientos.length} movimientos registrados`}
                 accion={
-                    <div className="flex gap-2">
-                        <Button variant="secondary" onClick={() => setModalAjuste(true)}>
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="secondary" onClick={() => setModalAjuste(true)} size="sm">
                             ⇄ Ajuste manual
                         </Button>
-                        <Button onClick={() => setModalEntrada(true)}>
+                        <Button onClick={() => setModalEntrada(true)} size="sm">
                             + Registrar entrada
                         </Button>
                     </div>
@@ -81,32 +81,54 @@ export default function InventarioPage() {
 
                     {verStockBajo && (
                         <div className="mt-2 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="text-gray-500 border-b border-gray-800 text-left">
-                                        {['Producto', 'Categoría', 'Stock actual', 'Mínimo', 'Estado'].map(h => (
-                                            <th key={h} className="px-5 py-3 font-medium">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-800">
-                                    {productosStockBajo.map(p => (
-                                        <tr key={p.id} className="text-gray-300">
-                                            <td className="px-5 py-3 text-white font-medium">{p.nombre}</td>
-                                            <td className="px-5 py-3 text-gray-500">{p.categoria || '—'}</td>
-                                            <td className={`px-5 py-3 font-bold ${p.cantidad === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
-                                                {p.cantidad}
-                                            </td>
-                                            <td className="px-5 py-3 text-gray-500">{p.cantidad_minima}</td>
-                                            <td className="px-5 py-3">
-                                                <Badge color={p.cantidad === 0 ? 'red' : 'yellow'}>
-                                                    {p.cantidad === 0 ? 'Agotado' : 'Stock bajo'}
-                                                </Badge>
-                                            </td>
+                            {/* Tarjetas en móvil */}
+                            <div className="md:hidden divide-y divide-gray-800">
+                                {productosStockBajo.map(p => (
+                                    <div key={p.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="text-white font-medium text-sm truncate">{p.nombre}</p>
+                                            <p className="text-gray-500 text-xs">{p.categoria || '—'}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className={`font-bold text-sm ${p.cantidad === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+                                                {p.cantidad}/{p.cantidad_minima}
+                                            </span>
+                                            <Badge color={p.cantidad === 0 ? 'red' : 'yellow'}>
+                                                {p.cantidad === 0 ? 'Agotado' : 'Stock bajo'}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Tabla en desktop */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="text-gray-500 border-b border-gray-800 text-left">
+                                            {['Producto', 'Categoría', 'Stock actual', 'Mínimo', 'Estado'].map(h => (
+                                                <th key={h} className="px-5 py-3 font-medium">{h}</th>
+                                            ))}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-800">
+                                        {productosStockBajo.map(p => (
+                                            <tr key={p.id} className="text-gray-300">
+                                                <td className="px-5 py-3 text-white font-medium">{p.nombre}</td>
+                                                <td className="px-5 py-3 text-gray-500">{p.categoria || '—'}</td>
+                                                <td className={`px-5 py-3 font-bold ${p.cantidad === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+                                                    {p.cantidad}
+                                                </td>
+                                                <td className="px-5 py-3 text-gray-500">{p.cantidad_minima}</td>
+                                                <td className="px-5 py-3">
+                                                    <Badge color={p.cantidad === 0 ? 'red' : 'yellow'}>
+                                                        {p.cantidad === 0 ? 'Agotado' : 'Stock bajo'}
+                                                    </Badge>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
                 </div>

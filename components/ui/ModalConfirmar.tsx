@@ -24,8 +24,8 @@ export function ModalConfirmar({
     if (!abierto) return null
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-gray-900 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-5 sm:p-6 shadow-2xl">
                 {/* Icono */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${peligroso ? 'bg-red-950' : 'bg-yellow-950'
                     }`}>

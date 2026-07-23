@@ -69,13 +69,13 @@ interface ModalProps {
 export function Modal({ abierto, onCerrar, titulo, children }: ModalProps) {
   if (!abierto) return null
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-bold text-lg">{titulo}</h2>
+    <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md p-5 sm:p-6 max-h-[90dvh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-white font-bold text-base sm:text-lg pr-4">{titulo}</h2>
           <button
             onClick={onCerrar}
-            className="text-gray-500 hover:text-white transition text-xl leading-none"
+            className="text-gray-500 hover:text-white transition text-xl leading-none shrink-0"
           >
             ✕
           </button>
@@ -119,12 +119,12 @@ interface PageHeaderProps {
 
 export function PageHeader({ titulo, subtitulo, accion }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
       <div>
-        <h1 className="text-white text-2xl font-bold">{titulo}</h1>
+        <h1 className="text-white text-xl sm:text-2xl font-bold">{titulo}</h1>
         {subtitulo && <p className="text-gray-500 text-sm mt-0.5">{subtitulo}</p>}
       </div>
-      {accion && <div>{accion}</div>}
+      {accion && <div className="shrink-0">{accion}</div>}
     </div>
   )
 }

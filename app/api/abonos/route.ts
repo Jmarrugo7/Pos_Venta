@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
             .eq('id', clienteId)
             .single()
 
-        const nuevoSaldo = Math.max(0, (cliente?.saldo_pendiente ?? 0) - monto)
+        const nuevoSaldo = (cliente?.saldo_pendiente ?? 0) - monto
         const { error: updateError } = await db
             .from('clientes')
             .update({ saldo_pendiente: nuevoSaldo })

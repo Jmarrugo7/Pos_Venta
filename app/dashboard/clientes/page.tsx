@@ -11,8 +11,8 @@ import type { Cliente } from '@/types'
 
 function ModalDeudaBloqueo({ cliente, onCerrar }: { cliente: Cliente; onCerrar: () => void }) {
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+        <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+            <div className="bg-gray-900 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-5 sm:p-6 shadow-2xl">
                 <div className="w-12 h-12 bg-yellow-950 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">⚠️</span>
                 </div>
@@ -20,8 +20,15 @@ function ModalDeudaBloqueo({ cliente, onCerrar }: { cliente: Cliente; onCerrar: 
                     No se puede eliminar
                 </h3>
                 <p className="text-gray-400 text-sm text-center mb-2">
-                    <span className="text-white font-medium">{cliente.nombre}</span> tiene una deuda pendiente de{' '}
-                    <span className="text-red-400 font-bold">{formatCOP(cliente.saldo_pendiente)}</span>.
+                    <span className="text-white font-medium">{cliente.nombre}</span>
+                    {cliente.saldo_pendiente !== 0 && (
+                        <>
+                            <br />Tiene un saldo {cliente.saldo_pendiente > 0 ? 'pendiente' : 'a favor'} de{' '}
+                            <span className={cliente.saldo_pendiente > 0 ? "text-red-400 font-bold" : "text-green-400 font-bold"}>
+                                {formatCOP(Math.abs(cliente.saldo_pendiente))}
+                            </span>.
+                        </>
+                    )}
                 </p>
                 <p className="text-gray-500 text-xs text-center mb-6">
                     Registra el pago completo de la deuda antes de eliminar este cliente.
@@ -60,7 +67,7 @@ export default function ClientesPage() {
     }
 
     function handleSolicitarEliminar(cliente: Cliente) {
-        if (cliente.saldo_pendiente > 0) {
+        if (cliente.saldo_pendiente !== 0) {
             setBloqueado(cliente)
         } else {
             setPendienteEliminar(cliente)
